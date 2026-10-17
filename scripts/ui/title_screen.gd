@@ -13,6 +13,8 @@ var _status: Label
 func _ready() -> void:
 	set_anchors_and_offsets_preset(PRESET_FULL_RECT)
 	GameState.in_game = false
+	AudioManager.set_ambience("")
+	AudioManager.set_music("res://assets/audio/music/title.wav")
 
 	var background := ColorRect.new()
 	background.color = Color("0a0d14")

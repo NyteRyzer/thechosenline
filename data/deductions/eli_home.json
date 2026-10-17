@@ -1,0 +1,45 @@
+{
+	"deductions": [
+		{
+			"id": "ded_staged_entry",
+			"title": "How did the intruder really get in?",
+			"prompt": "The house is set up to look like someone smashed the window and climbed in. Choose what really happened, tick the evidence that proves it, then connect it.",
+			"answers": [
+				{
+					"id": "ans_window",
+					"text": "They smashed the window and climbed in.",
+					"rebuttal": "Then the glass would be all over the carpet. Most of it is out on the porch."
+				},
+				{
+					"id": "ans_back_door",
+					"text": "They came in through the back door.",
+					"rebuttal": "The back door is bolted and chained from the inside. Nobody used it."
+				},
+				{
+					"id": "ans_forced_lock",
+					"text": "They forced the front door lock.",
+					"rebuttal": "There isn't a single scratch on that lock."
+				},
+				{
+					"id": "ans_spare_key",
+					"text": "They used our spare key, then faked a break-in."
+				}
+			],
+			"correct_answer": "ans_spare_key",
+			"required_evidence": [
+				"ev_glass_outside",
+				"ev_spare_key_missing",
+				"ev_lock_unforced"
+			],
+			"optional_evidence": [
+				"ev_back_door_bolted",
+				"ev_staged_prints"
+			],
+			"hint_missing": "That's what happened, but I can't prove it yet. What shows the window was faked? What shows how they opened the door?",
+			"hint_irrelevant": "One of these clues doesn't say anything about how they got in. Leave it out.",
+			"hint_not_found": "I think I know what happened, but I haven't found enough proof yet. The window, the front door and the key hooks might tell me more.",
+			"success_dialogue": "dlg_deduction_solved",
+			"effects": []
+		}
+	]
+}

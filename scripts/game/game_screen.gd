@@ -8,6 +8,8 @@ const InventoryPanel := preload("res://scripts/ui/inventory_panel.gd")
 const JournalPanel := preload("res://scripts/ui/journal_panel.gd")
 const PauseMenu := preload("res://scripts/ui/pause_menu.gd")
 const DebugOverlay := preload("res://scripts/ui/debug_overlay.gd")
+const DeductionBoard := preload("res://scripts/ui/deduction_board.gd")
+const ChapterEndPanel := preload("res://scripts/ui/chapter_end_panel.gd")
 const InteractionResolver := preload("res://scripts/interactions/interaction_resolver.gd")
 const FADE_SECONDS := 0.25
 const TOAST_SECONDS := 3.0
@@ -25,6 +27,7 @@ var _fade: ColorRect
 var _overlay: Control = null
 var _transitioning := false
 var _pending_room := ""
+var _pending_chapter := ""
 var _hovered_id := ""
 
 
@@ -32,8 +35,13 @@ func _ready() -> void:
 	set_anchors_and_offsets_preset(PRESET_FULL_RECT)
 	_resolver = InteractionResolver.new(GameState, ContentDB)
 	_build_ui()
-	GameState.item_added.connect(func(id): _toast("Picked up: %s   (Inventory: I)" % ContentDB.item_name(id), ContentDB.item_icon(id)))
-	GameState.evidence_added.connect(func(id): _toast("Journal updated: %s   (Journal: J)" % ContentDB.evidence_title(id)))
+	GameState.item_added.connect(func(id):
+		AudioManager.play_sfx("pickup")
+		_toast("Picked up: %s   (Inventory: I)" % ContentDB.item_name(id), ContentDB.item_icon(id)))
+	GameState.evidence_added.connect(func(id):
+		AudioManager.play_sfx("evidence")
+		_toast("Journal updated: %s   (Journal: J)" % ContentDB.evidence_title(id)))
+	AudioManager.set_music("")
 	GameState.selected_item_changed.connect(func(_id): _refresh_hud())
 	GameState.in_game = true
 	_enter_room(GameState.current_room_id, SceneRouter.last_entry == "load")
@@ -70,7 +78,9 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif event.is_action_pressed("toggle_inventory"):
 		_open_overlay(InventoryPanel.new())
 	elif event.is_action_pressed("toggle_journal"):
-		_open_overlay(JournalPanel.new())
+		_open_journal()
+	elif event.is_action_pressed("toggle_deduction"):
+		_open_deduction_board()
 	else:
 		return
 	get_viewport().set_input_as_handled()
@@ -88,6 +98,7 @@ func _enter_room(room_id: String, from_save: bool) -> void:
 	_room_view.build(room)
 	_room_view.refresh_visited()
 	_room_label.text = str(room.get("name", room_id))
+	AudioManager.set_ambience(str(room.get("ambience", "")))
 	_refresh_hud()
 	_update_prompt("")
 
@@ -108,6 +119,7 @@ func _enter_room(room_id: String, from_save: bool) -> void:
 
 func _transition_to(room_id: String) -> void:
 	_transitioning = true
+	AudioManager.play_sfx("door")
 	_fade.visible = true
 	_fade.mouse_filter = MOUSE_FILTER_STOP
 	var fade_out := create_tween()
@@ -138,7 +150,15 @@ func _on_hotspot_activated(hotspot_id: String) -> void:
 	if used_item != "":
 		GameState.select_item("")
 	_room_view.refresh_visited()
+	_present(result)
+
+
+## Plays a resolver result: sounds now, lines next, then any room change or chapter ending.
+func _present(result: Dictionary) -> void:
+	for sound in result.sounds:
+		AudioManager.play_sfx(sound)
 	_pending_room = result.goto_room
+	_pending_chapter = result.end_chapter
 	if result.lines.is_empty():
 		_on_dialogue_finished()
 	else:
@@ -151,6 +171,11 @@ func _show_lines(lines: Array) -> void:
 
 
 func _on_dialogue_finished() -> void:
+	if _pending_chapter != "":
+		var chapter_id := _pending_chapter
+		_pending_chapter = ""
+		_end_chapter(chapter_id)
+		return
 	if _pending_room != "":
 		var target := _pending_room
 		_pending_room = ""
@@ -158,6 +183,30 @@ func _on_dialogue_finished() -> void:
 		return
 	_update_prompt(_hovered_id)
 	_room_view.focus_hotspot()
+
+
+func _end_chapter(chapter_id: String) -> void:
+	GameState.set_flag("completed_" + chapter_id, true)
+	_autosave()
+	AudioManager.play_sfx("revelation")
+	AudioManager.set_music("res://assets/audio/music/title.wav")
+	var panel := ChapterEndPanel.new(chapter_id)
+	_open_overlay(panel)
+	panel.closed.connect(func(): AudioManager.set_music(""))
+
+
+func _open_journal() -> void:
+	var journal := JournalPanel.new()
+	_open_overlay(journal)
+	journal.deduction_requested.connect(_open_deduction_board, CONNECT_DEFERRED)
+
+
+func _open_deduction_board() -> void:
+	var board := DeductionBoard.new()
+	_open_overlay(board)
+	board.solved.connect(func(_id, result):
+		AudioManager.play_sfx("revelation")
+		_present(result))
 
 
 func _update_prompt(hotspot_id: String) -> void:
@@ -247,11 +296,11 @@ func _build_ui() -> void:
 	_item_label.clip_text = true
 	_item_label.add_theme_color_override("font_color", Color("e8c87a"))
 	hud_row.add_child(_item_label)
-	for entry in [["Inventory (I)", InventoryPanel], ["Journal (J)", JournalPanel], ["Menu (Esc)", PauseMenu]]:
+	for entry in [["Inventory (I)", func(): _open_overlay(InventoryPanel.new())], ["Journal (J)", _open_journal],
+			["Deduce (B)", _open_deduction_board], ["Menu (Esc)", func(): _open_overlay(PauseMenu.new())]]:
 		var button := Button.new()
 		button.text = entry[0]
-		var panel_script: GDScript = entry[1]
-		button.pressed.connect(func(): _open_overlay(panel_script.new()))
+		button.pressed.connect(entry[1])
 		hud_row.add_child(button)
 
 	_prompt_panel = PanelContainer.new()

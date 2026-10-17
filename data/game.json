@@ -3,7 +3,35 @@
 	"start_room": "room_eli_living_room",
 	"start_chapter": 1,
 	"objectives": [
-		{ "id": "obj_search_house", "text": "Search the house and work out what really happened here.", "until_flag": "m1_complete" },
-		{ "id": "obj_piece_together", "text": "Piece the evidence together. (The deduction board arrives in Milestone 2.)", "requires_flag": "m1_complete" }
+		{
+			"id": "obj_search_house",
+			"text": "Search the house and work out what really happened here.",
+			"until_flag": "ready_to_deduce"
+		},
+		{
+			"id": "obj_deduce",
+			"text": "Open the Deduction Board (B) and prove how the intruder really got in.",
+			"requires_flag": "ready_to_deduce",
+			"until_flag": "solved_ded_staged_entry"
+		},
+		{
+			"id": "obj_leave",
+			"text": "You know what happened. Leave through the front door.",
+			"requires_flag": "solved_ded_staged_entry",
+			"until_flag": "completed_ch1"
+		},
+		{
+			"id": "obj_done",
+			"text": "Chapter 1 complete. Keep exploring, or return to the title screen.",
+			"requires_flag": "completed_ch1"
+		}
+	],
+	"chapters": [
+		{
+			"id": "ch1",
+			"title": "Chapter 1 — The Unlocked Door",
+			"summary": "Someone let themselves into the Mercer house with the family's spare key, then smashed the window from the inside to stage a break-in. Mom is gone. And a feather that holds light was left behind, as if something not quite human had been there too.",
+			"teaser": "Next: the neighborhood. Someone on this street saw something tonight."
+		}
 	]
 }

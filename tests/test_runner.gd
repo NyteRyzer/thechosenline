@@ -5,11 +5,14 @@ extends Node
 ## Exits with code 0 when every check passes, 1 otherwise.
 
 const InteractionResolver := preload("res://scripts/interactions/interaction_resolver.gd")
+const DeductionLogic := preload("res://scripts/interactions/deduction_logic.gd")
 const GAME_SCENE := preload("res://scenes/game/game_screen.tscn")
 const TITLE_SCENE := preload("res://scenes/title/title_screen.tscn")
 const LIVING := "room_eli_living_room"
 const KITCHEN := "room_eli_kitchen"
 const SLICE_EVIDENCE := ["ev_glass_outside", "ev_spare_key_missing", "ev_unearthly_feather"]
+const DEDUCTION := "ded_staged_entry"
+const PROOF := ["ev_glass_outside", "ev_spare_key_missing", "ev_lock_unforced"]
 
 var _passed := 0
 var _failed := 0
@@ -30,6 +33,8 @@ func _ready() -> void:
 		"test_window_gives_clue_once",
 		"test_under_couch_needs_flashlight",
 		"test_wrong_item_gives_feedback",
+		"test_deduction_feedback",
+		"test_audio_assets_exist",
 		"test_critical_path_completes_slice",
 		"test_exhaustive_exploration_never_softlocks",
 		"test_save_load_round_trip",
@@ -141,9 +146,15 @@ func test_critical_path_completes_slice() -> void:
 		var result: Dictionary = _resolver.interact(step[0], step[1], step[2])
 		if result.goto_room != "":
 			GameState.goto_room(result.goto_room)
-	check(GameState.has_flag("m1_complete"), "critical path should complete the slice")
-	check(GameState.has_evidence("ev_lock_unforced"), "lock evidence must be auto-journaled at the end")
+	check(GameState.has_flag("ready_to_deduce"), "gathering the clues should lead to the deduction")
+	check(GameState.has_evidence("ev_lock_unforced"), "lock evidence must be auto-journaled")
 	check(GameState.inventory.size() >= 3, "critical path should collect at least three items")
+	var door: Dictionary = _resolver.interact(LIVING, "hs_living_front_door")
+	check(door.end_chapter == "", "the door must stay shut until the deduction is solved")
+	_solve_deduction()
+	door = _resolver.interact(LIVING, "hs_living_front_door")
+	check(door.end_chapter == "ch1", "after the deduction the front door should end chapter 1")
+	check(door.sounds.has("bell"), "leaving the house should ring the bell")
 
 
 ## Explores every hotspot in every reachable room with every held item until
@@ -162,9 +173,39 @@ func test_exhaustive_exploration_never_softlocks() -> void:
 		if JSON.stringify(GameState.to_dict()) == before:
 			break
 	check(visited_rooms.size() == ContentDB.rooms.size(), "every room should be reachable")
-	check(GameState.has_flag("m1_complete"), "exploration should always be able to finish the slice")
+	check(GameState.has_flag("ready_to_deduce"), "exploration should always reach the deduction")
+	var verdict := DeductionLogic.evaluate(ContentDB.deductions[DEDUCTION], "ans_spare_key", PROOF, Array(GameState.evidence))
+	check(verdict.correct, "exploration should always find enough proof for the deduction")
 	for evidence_id in SLICE_EVIDENCE:
 		check(GameState.has_evidence(evidence_id), "exploration should find %s" % evidence_id)
+
+
+func test_deduction_feedback() -> void:
+	var ded: Dictionary = ContentDB.deductions[DEDUCTION]
+	var owned := PROOF + ["ev_unearthly_feather", "ev_back_door_bolted"]
+	var wrong := DeductionLogic.evaluate(ded, "ans_window", PROOF, owned)
+	check(not wrong.correct and "porch" in wrong.feedback, "a wrong answer should give its rebuttal")
+	check(not DeductionLogic.evaluate(ded, "", PROOF, owned).correct, "no answer is not a solution")
+	var missing := DeductionLogic.evaluate(ded, "ans_spare_key", ["ev_glass_outside"], owned)
+	check(not missing.correct and missing.feedback == ded.hint_missing, "missing proof should give the missing hint")
+	var extra := DeductionLogic.evaluate(ded, "ans_spare_key", PROOF + ["ev_unearthly_feather"], owned)
+	check(not extra.correct and extra.feedback == ded.hint_irrelevant, "an unrelated clue should give the irrelevant hint")
+	var unfound := DeductionLogic.evaluate(ded, "ans_spare_key", PROOF, ["ev_glass_outside"])
+	check(not unfound.correct and unfound.feedback == ded.hint_not_found, "unfound proof should send the player back to search")
+	check(DeductionLogic.evaluate(ded, "ans_spare_key", PROOF, owned).correct, "the right answer and proof should solve it")
+	check(DeductionLogic.evaluate(ded, "ans_spare_key", PROOF + ["ev_back_door_bolted"], owned).correct, "optional supporting evidence is allowed")
+
+
+func test_audio_assets_exist() -> void:
+	for id in ["pickup", "evidence", "door", "bell", "revelation", "wrong", "click"]:
+		check(AudioManager.sfx_exists(id), "missing sound effect " + id)
+	check(ResourceLoader.exists("res://assets/audio/music/title.wav"), "missing title music")
+	for room_id in ContentDB.rooms:
+		check(ResourceLoader.exists(str(ContentDB.rooms[room_id].get("ambience", ""))), "%s needs ambience" % room_id)
+
+
+func _solve_deduction() -> void:
+	GameState.set_flag(ContentDB.solved_flag(DEDUCTION), true)
 
 
 # --- Save / load -----------------------------------------------------------
@@ -300,6 +341,29 @@ func test_ui_smoke() -> void:
 		check(game._overlay != null, "%s should open" % script.resource_path.get_file())
 		game._overlay.close()
 		await get_tree().process_frame
+
+	for evidence_id in PROOF:
+		GameState.add_evidence(evidence_id)
+	game._open_deduction_board()
+	await get_tree().process_frame
+	var board: Control = game._overlay
+	check(board != null, "deduction board should open")
+	check(not board.attempt("ans_forced_lock", PROOF), "a wrong deduction should be rejected")
+	check(game._is_blocked() and not GameState.has_flag("solved_" + DEDUCTION), "a wrong deduction keeps the board open")
+	check(board.attempt("ans_spare_key", PROOF), "the right deduction should be accepted")
+	await get_tree().process_frame
+	check(GameState.has_flag("solved_" + DEDUCTION), "solving should set the solved flag")
+	check(dialogue.is_active(), "solving should play the success dialogue")
+	dialogue.skip_all()
+	await get_tree().process_frame
+
+	game._on_hotspot_activated("hs_living_front_door")
+	dialogue.skip_all()
+	await get_tree().process_frame
+	check(GameState.has_flag("completed_ch1"), "leaving after the deduction should complete chapter 1")
+	check(game._overlay != null, "the chapter recap should be shown")
+	game._overlay.close()
+	await get_tree().process_frame
 
 	game._on_hotspot_activated("hs_living_to_kitchen")
 	await get_tree().create_timer(0.8).timeout

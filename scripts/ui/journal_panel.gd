@@ -2,6 +2,8 @@ extends "res://scripts/ui/modal_overlay.gd"
 ## Journal: current objective plus every evidence card the player has found.
 ## Evidence is journaled automatically, so nothing essential can be lost.
 
+signal deduction_requested
+
 var _card_title: Label
 var _card_text: Label
 
@@ -55,9 +57,18 @@ func _build() -> void:
 			focus_target = button
 			_show(evidence_id)
 
-	var close_button := add_button("Close", close)
+	var buttons := HBoxContainer.new()
+	buttons.add_theme_constant_override("separation", 12)
+	content.add_child(buttons)
+	add_button("Open Deduction Board (B)", _on_deduction_pressed, buttons)
+	var close_button := add_button("Close", close, buttons)
 	if focus_target == null:
 		focus_target = close_button
+
+
+func _on_deduction_pressed() -> void:
+	close()
+	deduction_requested.emit()
 
 
 func _show(evidence_id: String) -> void:

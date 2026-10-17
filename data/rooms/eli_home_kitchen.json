@@ -198,7 +198,8 @@
 						}
 					]
 				}
-			]
+			],
+			"ambience": "res://assets/audio/ambience/kitchen.wav"
 		}
 	]
 }

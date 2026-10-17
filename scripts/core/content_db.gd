@@ -6,7 +6,8 @@ extends Node
 const DATA_ROOT := "res://data"
 const SCREEN_RECT := Rect2(0, 0, 1280, 720)
 const MIN_HOTSPOT_SIZE := 48.0
-const EFFECT_TYPES := ["give_item", "remove_item", "add_evidence", "set_flag", "goto_room"]
+const EFFECT_TYPES := ["give_item", "remove_item", "add_evidence", "set_flag", "goto_room", "play_sound", "end_chapter"]
+const SFX_DIR := "res://assets/audio/sfx/"
 const RULE_KEYS := [
 	"use_item", "requires_flags", "requires_absent_flags", "requires_items",
 	"requires_absent_items", "requires_evidence", "requires_absent_evidence",
@@ -19,6 +20,7 @@ var items: Dictionary = {}
 var evidence: Dictionary = {}
 var dialogues: Dictionary = {}
 var characters: Dictionary = {}
+var deductions: Dictionary = {}
 var errors := PackedStringArray()
 var warnings := PackedStringArray()
 
@@ -28,7 +30,7 @@ func _ready() -> void:
 
 
 func reload() -> void:
-	for collection in [rooms, items, evidence, dialogues, characters]:
+	for collection in [rooms, items, evidence, dialogues, characters, deductions]:
 		collection.clear()
 	errors = PackedStringArray()
 	warnings = PackedStringArray()
@@ -40,14 +42,15 @@ func reload() -> void:
 	_load_folder("characters", "characters", characters)
 	_load_folder("dialogue", "dialogues", dialogues)
 	_load_folder("rooms", "rooms", rooms)
+	_load_folder("deductions", "deductions", deductions)
 	validate()
 
 	for message in errors:
 		push_error("[ContentDB] " + message)
 	for message in warnings:
 		push_warning("[ContentDB] " + message)
-	print("[ContentDB] Loaded %d rooms, %d items, %d evidence, %d dialogues, %d characters (%d errors, %d warnings)." % [
-		rooms.size(), items.size(), evidence.size(), dialogues.size(), characters.size(),
+	print("[ContentDB] Loaded %d rooms, %d items, %d evidence, %d deductions, %d dialogues, %d characters (%d errors, %d warnings)." % [
+		rooms.size(), items.size(), evidence.size(), deductions.size(), dialogues.size(), characters.size(),
 		errors.size(), warnings.size(),
 	])
 
@@ -56,6 +59,27 @@ func reload() -> void:
 
 func start_room() -> String:
 	return str(game_config.get("start_room", ""))
+
+
+func chapter(chapter_id: String) -> Dictionary:
+	for entry in game_config.get("chapters", []):
+		if str(entry.get("id", "")) == chapter_id:
+			return entry
+	return {}
+
+
+## The first deduction the player has not solved yet ({} when all are solved).
+func next_deduction(state: Node) -> Dictionary:
+	var ids := deductions.keys()
+	ids.sort()
+	for id in ids:
+		if not state.has_flag(solved_flag(id)):
+			return deductions[id]
+	return {}
+
+
+static func solved_flag(deduction_id: String) -> String:
+	return "solved_" + deduction_id
 
 
 func get_room(room_id: String) -> Dictionary:
@@ -199,6 +223,7 @@ func validate() -> void:
 		var where := "room '%s' (%s)" % [room_id, room._source]
 		_require_fields(room, ["name"], where)
 		_require_resource(room.get("backdrop", {}).get("image"), "%s backdrop image" % where)
+		_require_resource(room.get("ambience"), "%s ambience" % where)
 		room_links[room_id] = []
 
 		var on_enter = room.get("on_enter", {})
@@ -277,6 +302,9 @@ func validate() -> void:
 			if not has_plain:
 				errors.append("%s: only reacts to items; add an interaction without \"use_item\" so examining it gives feedback." % hwhere)
 
+	for id in deductions:
+		_validate_deduction(deductions[id], set_flags)
+
 	for check in flag_checks:
 		if not set_flags.has(check[0]):
 			warnings.append("%s: checks flag '%s', but no content ever sets it (typo?)." % [check[1], check[0]])
@@ -292,6 +320,26 @@ func validate() -> void:
 		for room_id in rooms:
 			if not reached.has(room_id):
 				warnings.append("Room '%s' cannot be reached from start room '%s' through goto_room effects." % [room_id, start])
+
+
+func _validate_deduction(deduction: Dictionary, set_flags: Dictionary) -> void:
+	var where := "deduction '%s' (%s)" % [deduction.id, deduction._source]
+	_require_fields(deduction, ["title", "prompt", "answers", "correct_answer", "required_evidence"], where)
+	set_flags[solved_flag(deduction.id)] = true
+	var answer_ids := []
+	for answer in _as_array(deduction.get("answers")):
+		answer_ids.append(str(answer.get("id", "")))
+		if str(answer.get("text", "")) == "":
+			errors.append("%s: every answer needs \"text\"." % where)
+	if not answer_ids.has(str(deduction.get("correct_answer", ""))):
+		errors.append("%s: correct_answer '%s' is not one of its answers." % [where, deduction.get("correct_answer", "")])
+	for key in ["required_evidence", "optional_evidence"]:
+		for evidence_id in _as_array(deduction.get(key)):
+			_require_ref(evidence, evidence_id, key, where)
+	if deduction.has("success_dialogue"):
+		_require_ref(dialogues, deduction.success_dialogue, "success_dialogue", where)
+	for effect in _as_array(deduction.get("effects")):
+		_validate_effect(effect, where, set_flags)
 
 
 func _require_fields(entry: Dictionary, fields: Array, where: String) -> void:
@@ -373,6 +421,14 @@ func _validate_effect(effect, where: String, set_flags: Dictionary) -> bool:
 			return _require_ref(evidence, id, type, where)
 		"goto_room":
 			return _require_ref(rooms, id, type, where)
+		"end_chapter":
+			if chapter(id).is_empty():
+				errors.append("%s: end_chapter refers to unknown chapter '%s' (add it to data/game.json \"chapters\")." % [where, id])
+				return false
+		"play_sound":
+			if not ResourceLoader.exists(SFX_DIR + id + ".wav"):
+				errors.append("%s: play_sound '%s' needs %s%s.wav (run tools/generate_audio.py)." % [where, id, SFX_DIR, id])
+				return false
 		"set_flag":
 			set_flags[id] = true
 	return true

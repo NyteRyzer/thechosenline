@@ -6,6 +6,7 @@ extends RefCounted
 const BINDINGS := {
 	"toggle_inventory": [KEY_I],
 	"toggle_journal": [KEY_J],
+	"toggle_deduction": [KEY_B],
 	"pause_menu": [KEY_ESCAPE],
 	"highlight_hotspots": [KEY_H],
 	"toggle_debug": [KEY_F3],
@@ -17,6 +18,7 @@ const DESCRIPTIONS := [
 	["Move between objects", "Tab / Shift+Tab or arrow keys"],
 	["Inventory", "I"],
 	["Journal", "J"],
+	["Deduction board", "B"],
 	["Highlight all objects (hold)", "H"],
 	["Menu / cancel selected item", "Esc (right-click also cancels an item)"],
 	["Developer debug overlay", "F3"],

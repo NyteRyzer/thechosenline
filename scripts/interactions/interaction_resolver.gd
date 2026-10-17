@@ -10,7 +10,10 @@ extends RefCounted
 ##   requires_evidence / requires_absent_evidence
 ##   dialogue                 id in data/dialogue, shown before inline lines
 ##   lines                    [{speaker, text}]
-##   effects                  [{type: give_item|remove_item|add_evidence|set_flag|goto_room, id, value?}]
+##   effects                  [{type, id, value?}] where type is one of
+##                            give_item, remove_item, add_evidence, set_flag,
+##                            goto_room, play_sound (id = assets/audio/sfx/<id>.wav),
+##                            end_chapter (id = chapter in data/game.json)
 ##
 ## The flag "seen_<hotspot_id>" is set after every interaction, so rules can
 ## check whether the player has examined something before.
@@ -24,9 +27,9 @@ func _init(game_state: Node, content_db: Node) -> void:
 	content = content_db
 
 
-## Returns {"lines": Array, "goto_room": String, "matched": bool}.
+## Returns {"lines", "goto_room", "end_chapter", "sounds", "matched"}.
 func interact(room_id: String, hotspot_id: String, used_item: String = "") -> Dictionary:
-	var result := {"lines": [], "goto_room": "", "matched": false}
+	var result := new_result()
 	var hotspot: Dictionary = content.find_hotspot(room_id, hotspot_id)
 	if hotspot.is_empty():
 		push_error("[Interaction] Hotspot '%s' not found in room '%s'." % [hotspot_id, room_id])
@@ -45,9 +48,19 @@ func interact(room_id: String, hotspot_id: String, used_item: String = "") -> Di
 
 	result.matched = true
 	result.lines = content.lines_for(rule)
-	for effect in rule.get("effects", []):
-		_apply_effect(effect, result)
+	apply_effects(rule.get("effects", []), result)
 	return result
+
+
+static func new_result() -> Dictionary:
+	return {"lines": [], "goto_room": "", "end_chapter": "", "sounds": [], "matched": false}
+
+
+## Applies effects to the game state. Presentation effects (room changes,
+## chapter endings, sounds) are recorded in `result` for the UI to perform.
+func apply_effects(effects: Array, result: Dictionary) -> void:
+	for effect in effects:
+		_apply_effect(effect, result)
 
 
 func find_rule(hotspot: Dictionary, used_item: String = "") -> Dictionary:
@@ -94,5 +107,9 @@ func _apply_effect(effect: Dictionary, result: Dictionary) -> void:
 			state.set_flag(id, effect.get("value", true))
 		"goto_room":
 			result.goto_room = id
+		"end_chapter":
+			result.end_chapter = id
+		"play_sound":
+			result.sounds.append(id)
 		var unknown:
 			push_error("[Interaction] Unknown effect type '%s'." % unknown)

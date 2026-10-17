@@ -77,16 +77,32 @@
 					"interactions": [
 						{
 							"requires_flags": [
-								"m1_complete"
+								"solved_ded_staged_entry"
+							],
+							"dialogue": "dlg_leave_house",
+							"effects": [
+								{
+									"type": "play_sound",
+									"id": "bell"
+								},
+								{
+									"type": "end_chapter",
+									"id": "ch1"
+								}
+							]
+						},
+						{
+							"requires_flags": [
+								"ready_to_deduce"
 							],
 							"lines": [
 								{
 									"speaker": "eli",
-									"text": "Not yet. I have the pieces. Now I need to make them fit."
+									"text": "Not yet. I have the pieces. I need to make them fit first."
 								},
 								{
 									"speaker": "narrator",
-									"text": "[The deduction board that opens this door arrives in Milestone 2.]"
+									"text": "[Open the Deduction Board with B, or from the Journal.]"
 								}
 							]
 						},
@@ -96,7 +112,7 @@
 								"ev_spare_key_missing",
 								"ev_unearthly_feather"
 							],
-							"dialogue": "dlg_slice_complete",
+							"dialogue": "dlg_evidence_gathered",
 							"effects": [
 								{
 									"type": "add_evidence",
@@ -104,7 +120,7 @@
 								},
 								{
 									"type": "set_flag",
-									"id": "m1_complete"
+									"id": "ready_to_deduce"
 								}
 							]
 						},
@@ -325,6 +341,10 @@
 								{
 									"type": "set_flag",
 									"id": "got_gold_feather"
+								},
+								{
+									"type": "play_sound",
+									"id": "bell"
 								}
 							]
 						},
@@ -393,7 +413,8 @@
 						}
 					]
 				}
-			]
+			],
+			"ambience": "res://assets/audio/ambience/house.wav"
 		}
 	]
 }
