@@ -1,0 +1,28 @@
+{
+	"items": [
+		{
+			"id": "item_flashlight",
+			"name": "Flashlight",
+			"description": "Mom's heavy yellow flashlight from the junk drawer. Good for dark places.",
+			"icon": "res://assets/art/items/flashlight.png"
+		},
+		{
+			"id": "item_glass_shard",
+			"name": "Glass Shard",
+			"description": "A piece of the living room window. It was lying on the porch, not the carpet.",
+			"icon": "res://assets/art/items/glass_shard.png"
+		},
+		{
+			"id": "item_key_tag",
+			"name": "Brass Key Tag",
+			"description": "Stamped MERCER — SPARE. It hung on the spare key. The key itself is gone.",
+			"icon": "res://assets/art/items/key_tag.png"
+		},
+		{
+			"id": "item_gold_feather",
+			"name": "Pale Gold Feather",
+			"description": "Warm to the touch, and faintly glowing in the dark. No bird grows feathers like this.",
+			"icon": "res://assets/art/items/gold_feather.png"
+		}
+	]
+}

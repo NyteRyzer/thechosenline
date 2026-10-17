@@ -1,0 +1,41 @@
+{
+	"dialogues": [
+		{
+			"id": "dlg_home_intro",
+			"lines": [
+				{ "speaker": "narrator", "text": "Thursday, 11:42 PM. The Mercer house." },
+				{ "speaker": "eli", "text": "Front door was unlocked. It's never unlocked." },
+				{ "speaker": "eli", "text": "Mom? ...Mom!" },
+				{ "speaker": "narrator", "text": "No answer. Just the hum of the refrigerator, and sodium-orange streetlight spilling through a broken window." },
+				{ "speaker": "eli", "text": "Okay. Breathe. Before I call anyone, I need to see what happened here." },
+				{ "speaker": "narrator", "text": "[Click an object, or move between objects with Tab or the arrow keys and press Enter. Hold H to highlight everything. I = Inventory, J = Journal, Esc = Menu.]" }
+			]
+		},
+		{
+			"id": "dlg_kitchen_intro",
+			"lines": [
+				{ "speaker": "eli", "text": "The kitchen. They barely touched it in here." },
+				{ "speaker": "eli", "text": "Every drawer yanked open, and the fridge still humming like nothing happened." }
+			]
+		},
+		{
+			"id": "dlg_find_feather",
+			"lines": [
+				{ "speaker": "narrator", "text": "The flashlight beam slides under the couch frame and catches something pale." },
+				{ "speaker": "eli", "text": "A feather? It's warm. Like it was just..." },
+				{ "speaker": "narrator", "text": "Away from the beam it keeps glowing: faint, gold, steady." },
+				{ "speaker": "narrator", "text": "Somewhere outside, a church bell rings once. There's no church on this street." },
+				{ "speaker": "eli", "text": "Okay. That's not normal." }
+			]
+		},
+		{
+			"id": "dlg_slice_complete",
+			"lines": [
+				{ "speaker": "eli", "text": "Glass blown out onto the porch. The spare key gone. Not a scratch on the lock." },
+				{ "speaker": "eli", "text": "And a feather that glows in the dark." },
+				{ "speaker": "eli", "text": "None of this fits a normal break-in. I need to lay it all out and think before I walk out that door." },
+				{ "speaker": "narrator", "text": "[End of the Milestone 1 slice. Next milestone: the deduction board, where you connect this evidence to unlock the way forward.]" }
+			]
+		}
+	]
+}

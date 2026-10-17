@@ -1,0 +1,399 @@
+{
+	"rooms": [
+		{
+			"id": "room_eli_living_room",
+			"name": "Mercer House — Living Room",
+			"on_enter": {
+				"dialogue": "dlg_home_intro",
+				"once_flag": "intro_home_played"
+			},
+			"backdrop": {
+				"image": "res://assets/art/backgrounds/living_room.png",
+				"base_color": "#121827"
+			},
+			"hotspots": [
+				{
+					"id": "hs_living_window",
+					"name": "Broken Window",
+					"rect": [
+						60,
+						140,
+						230,
+						210
+					],
+					"interactions": [
+						{
+							"requires_absent_flags": [
+								"got_glass_shard"
+							],
+							"lines": [
+								{
+									"speaker": "eli",
+									"text": "The window's smashed. Cold air, and that orange buzz from the streetlamp."
+								},
+								{
+									"speaker": "eli",
+									"text": "Wait. There's barely any glass in here. Most of it is out on the porch."
+								},
+								{
+									"speaker": "eli",
+									"text": "If someone broke in, the glass should have fallen inside. I'm keeping a piece."
+								}
+							],
+							"effects": [
+								{
+									"type": "give_item",
+									"id": "item_glass_shard"
+								},
+								{
+									"type": "add_evidence",
+									"id": "ev_glass_outside"
+								},
+								{
+									"type": "set_flag",
+									"id": "got_glass_shard"
+								}
+							]
+						},
+						{
+							"lines": [
+								{
+									"speaker": "eli",
+									"text": "Glass on the porch, not the carpet. Whoever broke this was standing in our living room."
+								}
+							]
+						}
+					]
+				},
+				{
+					"id": "hs_living_front_door",
+					"name": "Front Door",
+					"rect": [
+						330,
+						150,
+						150,
+						350
+					],
+					"interactions": [
+						{
+							"requires_flags": [
+								"m1_complete"
+							],
+							"lines": [
+								{
+									"speaker": "eli",
+									"text": "Not yet. I have the pieces. Now I need to make them fit."
+								},
+								{
+									"speaker": "narrator",
+									"text": "[The deduction board that opens this door arrives in Milestone 2.]"
+								}
+							]
+						},
+						{
+							"requires_evidence": [
+								"ev_glass_outside",
+								"ev_spare_key_missing",
+								"ev_unearthly_feather"
+							],
+							"dialogue": "dlg_slice_complete",
+							"effects": [
+								{
+									"type": "add_evidence",
+									"id": "ev_lock_unforced"
+								},
+								{
+									"type": "set_flag",
+									"id": "m1_complete"
+								}
+							]
+						},
+						{
+							"requires_absent_flags": [
+								"seen_hs_living_front_door"
+							],
+							"lines": [
+								{
+									"speaker": "eli",
+									"text": "The deadbolt's open. I check the lock: no scratches, no pry marks."
+								},
+								{
+									"speaker": "eli",
+									"text": "Somebody unlocked this. They didn't break it."
+								},
+								{
+									"speaker": "eli",
+									"text": "I'm not leaving until I understand what happened here."
+								}
+							],
+							"effects": [
+								{
+									"type": "add_evidence",
+									"id": "ev_lock_unforced"
+								}
+							]
+						},
+						{
+							"lines": [
+								{
+									"speaker": "eli",
+									"text": "Not a mark on the lock. I'm not leaving until I understand what happened here."
+								}
+							]
+						}
+					]
+				},
+				{
+					"id": "hs_living_key_hooks",
+					"name": "Key Hooks",
+					"rect": [
+						490,
+						206,
+						72,
+						90
+					],
+					"interactions": [
+						{
+							"requires_absent_flags": [
+								"got_key_tag"
+							],
+							"lines": [
+								{
+									"speaker": "eli",
+									"text": "Three hooks. Mom's keys, my keys, and the spare."
+								},
+								{
+									"speaker": "eli",
+									"text": "The spare's hook is empty. Just its little brass tag, lying on the floor."
+								}
+							],
+							"effects": [
+								{
+									"type": "give_item",
+									"id": "item_key_tag"
+								},
+								{
+									"type": "add_evidence",
+									"id": "ev_spare_key_missing"
+								},
+								{
+									"type": "set_flag",
+									"id": "got_key_tag"
+								}
+							]
+						},
+						{
+							"lines": [
+								{
+									"speaker": "eli",
+									"text": "Whoever took the spare knew exactly where we keep it."
+								}
+							]
+						}
+					]
+				},
+				{
+					"id": "hs_living_photo",
+					"name": "Family Photo",
+					"rect": [
+						410,
+						548,
+						130,
+						92
+					],
+					"interactions": [
+						{
+							"requires_absent_flags": [
+								"seen_hs_living_photo"
+							],
+							"lines": [
+								{
+									"speaker": "eli",
+									"text": "Our photo from the lake. The glass is cracked straight down the middle."
+								},
+								{
+									"speaker": "eli",
+									"text": "Everything else got thrown around. This was laid face-down. Gently. Like someone didn't want it watching."
+								}
+							]
+						},
+						{
+							"lines": [
+								{
+									"speaker": "eli",
+									"text": "The crack runs right between me and Mom."
+								}
+							]
+						}
+					]
+				},
+				{
+					"id": "hs_living_bookshelf",
+					"name": "Toppled Bookshelf",
+					"rect": [
+						566,
+						400,
+						290,
+						140
+					],
+					"interactions": [
+						{
+							"requires_absent_flags": [
+								"seen_hs_living_bookshelf"
+							],
+							"lines": [
+								{
+									"speaker": "eli",
+									"text": "Every book pulled off the shelf, spines cracked open."
+								},
+								{
+									"speaker": "eli",
+									"text": "Like someone was hunting for something hidden between the pages. Or wanted it to look that way."
+								}
+							]
+						},
+						{
+							"lines": [
+								{
+									"speaker": "eli",
+									"text": "Mom's books. I'll put them back later. If there is a later."
+								}
+							]
+						}
+					]
+				},
+				{
+					"id": "hs_living_couch",
+					"name": "Couch",
+					"rect": [
+						870,
+						310,
+						340,
+						182
+					],
+					"interactions": [
+						{
+							"requires_absent_flags": [
+								"seen_hs_living_couch"
+							],
+							"lines": [
+								{
+									"speaker": "eli",
+									"text": "Cushions slashed open. Stuffing everywhere."
+								},
+								{
+									"speaker": "eli",
+									"text": "There's a dark gap underneath. I can't see a thing down there."
+								}
+							]
+						},
+						{
+							"lines": [
+								{
+									"speaker": "eli",
+									"text": "Whoever did this was angry. Or putting on a show."
+								}
+							]
+						}
+					]
+				},
+				{
+					"id": "hs_living_under_couch",
+					"name": "Under the Couch",
+					"rect": [
+						870,
+						494,
+						340,
+						64
+					],
+					"interactions": [
+						{
+							"use_item": "item_flashlight",
+							"requires_absent_flags": [
+								"got_gold_feather"
+							],
+							"dialogue": "dlg_find_feather",
+							"effects": [
+								{
+									"type": "give_item",
+									"id": "item_gold_feather"
+								},
+								{
+									"type": "add_evidence",
+									"id": "ev_unearthly_feather"
+								},
+								{
+									"type": "set_flag",
+									"id": "got_gold_feather"
+								}
+							]
+						},
+						{
+							"use_item": "item_flashlight",
+							"lines": [
+								{
+									"speaker": "eli",
+									"text": "Just dust and a pen I lost in ninth grade."
+								}
+							]
+						},
+						{
+							"requires_flags": [
+								"got_gold_feather"
+							],
+							"lines": [
+								{
+									"speaker": "eli",
+									"text": "Nothing else under there. Nothing I can see, anyway."
+								}
+							]
+						},
+						{
+							"requires_items": [
+								"item_flashlight"
+							],
+							"lines": [
+								{
+									"speaker": "eli",
+									"text": "Pitch black under there. I've got the flashlight. I should use it."
+								},
+								{
+									"speaker": "narrator",
+									"text": "[Open the Inventory (I), choose the Flashlight, then click here.]"
+								}
+							]
+						},
+						{
+							"lines": [
+								{
+									"speaker": "eli",
+									"text": "Too dark to see anything under there. I need a light. There's one in the kitchen, if they didn't take it."
+								}
+							]
+						}
+					]
+				},
+				{
+					"id": "hs_living_to_kitchen",
+					"name": "Kitchen",
+					"rect": [
+						1214,
+						150,
+						66,
+						350
+					],
+					"interactions": [
+						{
+							"effects": [
+								{
+									"type": "goto_room",
+									"id": "room_eli_kitchen"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

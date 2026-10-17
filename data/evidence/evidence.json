@@ -1,0 +1,34 @@
+{
+	"evidence": [
+		{
+			"id": "ev_glass_outside",
+			"title": "Glass Fell Outward",
+			"text": "Most of the broken window is lying on the porch. If someone broke in, the glass should be inside. The window was broken from inside the house."
+		},
+		{
+			"id": "ev_spare_key_missing",
+			"title": "The Spare Key Is Gone",
+			"text": "The spare key's hook is empty and its tag was left on the floor. Whoever came in knew where we keep it."
+		},
+		{
+			"id": "ev_lock_unforced",
+			"title": "The Front Lock Wasn't Forced",
+			"text": "The deadbolt was open, but there are no scratches or pry marks. Someone unlocked it."
+		},
+		{
+			"id": "ev_unearthly_feather",
+			"title": "A Feather That Holds Light",
+			"text": "Hidden under the couch: a warm, pale gold feather that glows in the dark. When I picked it up, a church bell rang. There's no church on our street."
+		},
+		{
+			"id": "ev_back_door_bolted",
+			"title": "Back Door Bolted From Inside",
+			"text": "The kitchen door is bolted and chained from the inside. Nobody came in or left that way."
+		},
+		{
+			"id": "ev_staged_prints",
+			"title": "Prints That Go Nowhere",
+			"text": "Muddy boot prints in the kitchen, all the same depth and perfectly spaced. They stop dead in the middle of the floor. Someone pressed them in."
+		}
+	]
+}

@@ -1,0 +1,9 @@
+{
+	"title": "The Chosen Line",
+	"start_room": "room_eli_living_room",
+	"start_chapter": 1,
+	"objectives": [
+		{ "id": "obj_search_house", "text": "Search the house and work out what really happened here.", "until_flag": "m1_complete" },
+		{ "id": "obj_piece_together", "text": "Piece the evidence together. (The deduction board arrives in Milestone 2.)", "requires_flag": "m1_complete" }
+	]
+}

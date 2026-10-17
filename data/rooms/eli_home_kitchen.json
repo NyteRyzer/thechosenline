@@ -1,0 +1,204 @@
+{
+	"rooms": [
+		{
+			"id": "room_eli_kitchen",
+			"name": "Mercer House — Kitchen",
+			"on_enter": {
+				"dialogue": "dlg_kitchen_intro",
+				"once_flag": "intro_kitchen_played"
+			},
+			"backdrop": {
+				"image": "res://assets/art/backgrounds/kitchen.png",
+				"base_color": "#151b1f"
+			},
+			"hotspots": [
+				{
+					"id": "hs_kitchen_back_door",
+					"name": "Back Door",
+					"rect": [
+						80,
+						170,
+						150,
+						350
+					],
+					"interactions": [
+						{
+							"requires_absent_flags": [
+								"seen_hs_kitchen_back_door"
+							],
+							"lines": [
+								{
+									"speaker": "eli",
+									"text": "Deadbolt thrown. Chain on. From the inside."
+								},
+								{
+									"speaker": "eli",
+									"text": "Nobody came in this way. And nobody left this way either."
+								}
+							],
+							"effects": [
+								{
+									"type": "add_evidence",
+									"id": "ev_back_door_bolted"
+								}
+							]
+						},
+						{
+							"lines": [
+								{
+									"speaker": "eli",
+									"text": "Bolted from the inside. Nobody used this door tonight."
+								}
+							]
+						}
+					]
+				},
+				{
+					"id": "hs_kitchen_drawer",
+					"name": "Junk Drawer",
+					"rect": [
+						460,
+						398,
+						160,
+						64
+					],
+					"interactions": [
+						{
+							"requires_absent_flags": [
+								"got_flashlight"
+							],
+							"lines": [
+								{
+									"speaker": "eli",
+									"text": "Every drawer's been dumped except the junk drawer."
+								},
+								{
+									"speaker": "eli",
+									"text": "Batteries, takeout menus... and Mom's big yellow flashlight. Still works."
+								}
+							],
+							"effects": [
+								{
+									"type": "give_item",
+									"id": "item_flashlight"
+								},
+								{
+									"type": "set_flag",
+									"id": "got_flashlight"
+								}
+							]
+						},
+						{
+							"lines": [
+								{
+									"speaker": "eli",
+									"text": "Batteries and takeout menus. Nothing else useful."
+								}
+							]
+						}
+					]
+				},
+				{
+					"id": "hs_kitchen_fridge",
+					"name": "Fridge",
+					"rect": [
+						820,
+						190,
+						170,
+						330
+					],
+					"interactions": [
+						{
+							"requires_absent_flags": [
+								"seen_hs_kitchen_fridge"
+							],
+							"lines": [
+								{
+									"speaker": "eli",
+									"text": "The calendar on the fridge. Today's square is circled in red ink."
+								},
+								{
+									"speaker": "eli",
+									"text": "That's not Mom's handwriting. It isn't anyone's handwriting I know."
+								}
+							]
+						},
+						{
+							"lines": [
+								{
+									"speaker": "eli",
+									"text": "Today, circled in red. Somebody knew this was the day."
+								}
+							]
+						}
+					]
+				},
+				{
+					"id": "hs_kitchen_footprints",
+					"name": "Muddy Footprints",
+					"rect": [
+						740,
+						580,
+						440,
+						80
+					],
+					"interactions": [
+						{
+							"requires_absent_flags": [
+								"seen_hs_kitchen_footprints"
+							],
+							"lines": [
+								{
+									"speaker": "eli",
+									"text": "Muddy boot prints, coming in from the living room."
+								},
+								{
+									"speaker": "eli",
+									"text": "All the same depth, perfectly spaced. And they stop dead in the middle of the floor."
+								},
+								{
+									"speaker": "eli",
+									"text": "Real footprints don't look like that. Somebody pressed these in."
+								}
+							],
+							"effects": [
+								{
+									"type": "add_evidence",
+									"id": "ev_staged_prints"
+								}
+							]
+						},
+						{
+							"lines": [
+								{
+									"speaker": "eli",
+									"text": "Prints that go nowhere."
+								}
+							]
+						}
+					]
+				},
+				{
+					"id": "hs_kitchen_to_living",
+					"name": "Living Room",
+					"rect": [
+						1180,
+						170,
+						100,
+						350
+					],
+					"interactions": [
+						{
+							"effects": [
+								{
+									"type": "goto_room",
+									"id": "room_eli_living_room"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}
